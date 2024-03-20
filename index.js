@@ -64,24 +64,25 @@ app.get('/reviews', async (req, res) => {
 });
 
 // Adding review to DB
-app.post('/reviws', async (req, res) => {
-    console.log("Adding review")
-  try {
-    const collection = client.db("SaasMonk_Movies").collection("Reviews");
-    const post = {
-        name: req.body.name,
-        releaseDate: req.body.releaseDate,
-        totalStars: 0,
-        totalReviews: 0
-    };
+app.post('/reviews', async (req, res) => {
+    console.log("Adding review");
+    try {
+        const collection = client.db("SaasMonk_Movies").collection("Reviews");
+        const review = {
+            movieId: new ObjectId(req.body.movieID), // This assumes req.body.movieID is a valid ObjectId string
+            reviewerName: req.body.name,
+            rating: req.body.rating,
+            reviewComments: req.body.comment
+        };
 
-    await collection.insertOne(post);
-    return res.json("Movie has been created.");
+        await collection.insertOne(review);
+        return res.json("Review has been added.");
     } catch (error) {
         console.error("Error executing query:", error);
         return res.status(500).json(error);
     }
 });
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
