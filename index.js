@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { ObjectId } from 'mongodb';
-import client from './database.js';
+import client from './db.js';
 import cors from 'cors';
 
 dotenv.config();
