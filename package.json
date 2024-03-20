@@ -1,0 +1,22 @@
+{
+  "name": "saasmonk-movies-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamaryanyadavv/saasmonk-assg-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iamaryanyadavv/saasmonk-assg-backend/issues"
+  },
+  "homepage": "https://github.com/iamaryanyadavv/saasmonk-assg-backend#readme",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
