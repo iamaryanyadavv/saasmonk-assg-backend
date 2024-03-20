@@ -177,6 +177,7 @@ app.patch('/reviews/:id', async (req, res) => {
         const { id } = req.params;
 
         const updateResult = await reviewsCollection.updateOne({ _id: new ObjectId(id) }, { $set: req.body });
+        console.log(updateResult)
 
         if (updateResult.matchedCount === 0) {
             return res.status(404).json({ message: "Review not found" });
