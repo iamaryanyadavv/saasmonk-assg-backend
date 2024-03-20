@@ -138,7 +138,7 @@ app.delete('/reviews/:id', async (req, res) => {
         await moviesCollection.updateOne(
             { _id: reviewToDelete.movieId },
             {
-                $inc: { totalStars: -reviewToDelete.rating, totalReviews: -1 }
+                $inc: { totalStars: parseInt(-reviewToDelete.rating), totalReviews: -1 }
             }
         );
 
