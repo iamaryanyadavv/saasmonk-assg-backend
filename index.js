@@ -70,9 +70,9 @@ app.post('/reviews', async (req, res) => {
         const collection = client.db("SaasMonk_Movies").collection("Reviews");
         const review = {
             movieId: new ObjectId(req.body.movieID), // This assumes req.body.movieID is a valid ObjectId string
-            reviewerName: req.body.name,
+            name: req.body.name,
             rating: req.body.rating,
-            reviewComments: req.body.comment
+            comment: req.body.comment
         };
 
         await collection.insertOne(review);
