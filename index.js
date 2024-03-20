@@ -149,6 +149,64 @@ app.delete('/reviews/:id', async (req, res) => {
     }
 });
 
+// Edit a movie by ID
+app.patch('/movies/:id', async (req, res) => {
+    try {
+        const collection = client.db("SaasMonk_Movies").collection("Movies");
+        const { id } = req.params;
+        const update = { $set: req.body };
+
+        const result = await collection.updateOne({ _id: new ObjectId(id) }, update);
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Movie not found" });
+        }
+
+        return res.json({ message: "Movie updated successfully." });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        return res.status(500).json(error);
+    }
+});
+
+// Edit a review by ID and update associated movie's rating
+app.patch('/reviews/:id', async (req, res) => {
+    try {
+        const reviewsCollection = client.db("SaasMonk_Movies").collection("Reviews");
+        const moviesCollection = client.db("SaasMonk_Movies").collection("Movies");
+        const { id } = req.params;
+
+        const updateResult = await reviewsCollection.updateOne({ _id: new ObjectId(id) }, { $set: req.body });
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+        const updatedReview = await reviewsCollection.findOne({ _id: new ObjectId(id) });
+        const movieId = updatedReview.movieId;
+
+        const reviews = await reviewsCollection.find({ movieId: movieId }).toArray();
+        const totalStars = reviews.reduce((acc, { rating }) => acc + rating, 0);
+        const averageRating = totalStars / reviews.length;
+
+        await moviesCollection.updateOne(
+            { _id: movieId },
+            {
+                $set: {
+                    averageRating: averageRating,
+                    totalStars: totalStars
+                }
+            }
+        );
+
+        return res.json({ message: "Review and movie updated successfully." });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        return res.status(500).json(error);
+    }
+});
+
+
+
 
 
 
