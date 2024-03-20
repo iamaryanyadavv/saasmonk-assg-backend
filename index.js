@@ -65,23 +65,91 @@ app.get('/reviews', async (req, res) => {
 
 // Adding review to DB
 app.post('/reviews', async (req, res) => {
-    console.log("Adding review");
     try {
-        const collection = client.db("SaasMonk_Movies").collection("Reviews");
+        const reviewsCollection = client.db("SaasMonk_Movies").collection("Reviews");
+        const moviesCollection = client.db("SaasMonk_Movies").collection("Movies");
+
         const review = {
-            movieId: new ObjectId(req.body.movieID), // This assumes req.body.movieID is a valid ObjectId string
+            movieId: new ObjectId(req.body.movieID),
             name: req.body.name,
             rating: req.body.rating,
             comment: req.body.comment
         };
 
-        await collection.insertOne(review);
-        return res.json("Review has been added.");
+        const reviewResult = await reviewsCollection.insertOne(review);
+
+        const updateResult = await moviesCollection.updateOne(
+            { _id: review.movieId },
+            {
+                $inc: { totalStars: parseInt(review.rating), totalReviews: 1 }
+            }
+        );
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(404).json({ message: "Movie not found" });
+        }
+
+        return res.json({ message: "Review has been added and movie updated." });
     } catch (error) {
         console.error("Error executing query:", error);
         return res.status(500).json(error);
     }
 });
+
+
+// Delete a movie by ID
+app.delete('/movies/:id', async (req, res) => {
+    try {
+        const collection = client.db("SaasMonk_Movies").collection("Movies");
+        const { id } = req.params;
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Movie not found" });
+        }
+
+        const reviewsCollection = client.db("SaasMonk_Movies").collection("Reviews");
+        await reviewsCollection.deleteMany({ movieId: new ObjectId(id) });
+
+        return res.json({ message: "Movie and associated reviews deleted" });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        return res.status(500).json(error);
+    }
+});
+
+// Delete a review by ID
+app.delete('/reviews/:id', async (req, res) => {
+    try {
+        const reviewsCollection = client.db("SaasMonk_Movies").collection("Reviews");
+        const moviesCollection = client.db("SaasMonk_Movies").collection("Movies");
+        const { id } = req.params;
+
+        const reviewToDelete = await reviewsCollection.findOne({ _id: new ObjectId(id) });
+        if (!reviewToDelete) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        const deleteResult = await reviewsCollection.deleteOne({ _id: new ObjectId(id) });
+        if (deleteResult.deletedCount === 0) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        await moviesCollection.updateOne(
+            { _id: reviewToDelete.movieId },
+            {
+                $inc: { totalStars: -reviewToDelete.rating, totalReviews: -1 }
+            }
+        );
+
+        return res.json({ message: "Review deleted and movie updated." });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        return res.status(500).json(error);
+    }
+});
+
+
 
 
 app.listen(port, () => {
