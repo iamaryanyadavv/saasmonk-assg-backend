@@ -151,6 +151,7 @@ app.delete('/reviews/:id', async (req, res) => {
 
 // Edit a movie by ID
 app.patch('/movies/:id', async (req, res) => {
+    console.log("Im ehre")
     try {
         const collection = client.db("SaasMonk_Movies").collection("Movies");
         const { id } = req.params;
